@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Personal Finance Management Web Application
 
 MoneyMind is a Django-based personal finance tracker built for portfolio use and interview discussions. It includes authentication, transaction management, budgeting, spending analytics with Pandas, Chart.js dashboards, and a starter machine learning forecast using scikit-learn.
@@ -63,3 +64,10 @@ python manage.py runserver
 - A `LinearRegression` model is trained on historical monthly expense totals.
 - If enough history exists, the next month's expense is predicted and displayed on the dashboard.
 - If only one month exists, the latest month's amount is used as a basic starter prediction.
+=======
+# Personal Finance Management Web Application
+
+## Installation
+
+```bash
+python manage.py runserver
