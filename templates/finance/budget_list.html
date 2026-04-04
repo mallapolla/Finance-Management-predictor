@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block title %}Budgets | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="section-banner mb-4">
+    <div>
+        <span class="eyebrow">Budget planning</span>
+        <h1 class="page-title mb-1">Monthly budgets</h1>
+        <p class="text-muted mb-0">Define limits for each month and monitor whether your expenses stay on track.</p>
+    </div>
+    <a href="{% url 'budget_add' %}" class="btn btn-dark">Add Budget</a>
+</div>
+
+<div class="content-card">
+    <div class="table-responsive">
+        <table class="table align-middle">
+            <thead><tr><th>Month</th><th>Budget Limit</th><th>Status</th><th class="text-end">Actions</th></tr></thead>
+            <tbody>
+                {% for budget in budgets %}
+                    <tr>
+                        <td>{{ budget.month|date:'F Y' }}</td>
+                        <td>Rs. {{ budget.limit_amount }}</td>
+                        <td>{% if budget.month == current_month %}<span class="badge text-bg-primary">Current Month</span>{% else %}<span class="badge text-bg-secondary">Archived</span>{% endif %}</td>
+                        <td class="text-end">
+                            <a href="{% url 'budget_edit' budget.pk %}" class="btn btn-sm btn-outline-dark">Edit</a>
+                            <a href="{% url 'budget_delete' budget.pk %}" class="btn btn-sm btn-outline-danger">Delete</a>
+                        </td>
+                    </tr>
+                {% empty %}
+                    <tr><td colspan="4" class="text-center text-muted">No budgets saved yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

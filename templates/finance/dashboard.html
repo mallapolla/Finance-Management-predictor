@@ -1,0 +1,182 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard | MoneyMind{% endblock %}
+
+{% block content %}
+<section class="hero-panel mb-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="eyebrow">Personal Finance Management App</span>
+            <h1 class="hero-title">A complete money dashboard with analytics, budgets, and ML predictions.</h1>
+            <p class="hero-copy">Monitor your cash flow, understand where your money goes, and stay ahead with monthly expense forecasts built from your historical data.</p>
+            <div class="d-flex flex-wrap gap-2">
+                <a class="btn btn-dark" href="{% url 'transaction_add' %}">Add Transaction</a>
+                <a class="btn btn-outline-dark" href="{% url 'budget_add' %}">Set Budget</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="prediction-card">
+                <span class="mini-label">Next Month Prediction</span>
+                {% if prediction %}
+                    <div class="display-6 mb-2">Rs. {{ prediction.amount }}</div>
+                    <p class="mb-1">Predicted expenses for {{ prediction.label }}</p>
+                    <small class="text-light-emphasis">Trained on {{ prediction.data_points }} month{{ prediction.data_points|pluralize }} of expense history.</small>
+                {% else %}
+                    <div class="display-6 mb-2">No forecast yet</div>
+                    <p class="mb-0">Add at least one expense to generate a starter forecast.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="row g-3 mb-4">
+    <div class="col-md-6 col-xl-3"><div class="metric-card income-card"><span>Total Income</span><h3>Rs. {{ income_total }}</h3></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card expense-card"><span>Total Expenses</span><h3>Rs. {{ expense_total }}</h3></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card balance-card"><span>Available Balance</span><h3>Rs. {{ balance }}</h3></div></div>
+    <div class="col-md-6 col-xl-3"><div class="metric-card neutral-card"><span>Tracked Entries</span><h3>{{ transaction_count }}</h3></div></div>
+</section>
+
+<section class="row g-4 mb-4">
+    <div class="col-lg-8">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Monthly trend</span><h2 class="section-title">Income vs expenses</h2></div></div>
+            <canvas id="monthlyChart" height="120"></canvas>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Category analysis</span><h2 class="section-title">Top expense buckets</h2></div></div>
+            <canvas id="categoryChart" height="220"></canvas>
+        </div>
+    </div>
+</section>
+
+<section class="row g-4 mb-4">
+    <div class="col-lg-5">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Budget control</span><h2 class="section-title">This month budget</h2></div><a href="{% url 'budget_list' %}" class="btn btn-sm btn-outline-dark">Manage</a></div>
+            {% if monthly_budget %}
+                <p class="mb-2">Budget set for {{ monthly_budget.month|date:'F Y' }}: <strong>Rs. {{ monthly_budget.limit_amount }}</strong></p>
+                <p class="mb-2">Spent this month: <strong>Rs. {{ current_month_expense_total }}</strong></p>
+                <div class="progress mb-3 finance-progress" role="progressbar" aria-valuenow="{{ budget_progress|default:0 }}" aria-valuemin="0" aria-valuemax="100"><div class="progress-bar" style="width: {{ budget_progress|default:0 }}%"></div></div>
+                {% if budget_alert %}
+                    <div class="alert alert-danger mb-0">{{ budget_alert }}</div>
+                {% else %}
+                    <div class="alert alert-success mb-0">Budget is currently under control.</div>
+                {% endif %}
+            {% else %}
+                <p class="mb-3">No budget set for the current month yet.</p>
+                <a href="{% url 'budget_add' %}" class="btn btn-dark">Create Monthly Budget</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Smart insights</span><h2 class="section-title">What your data is saying</h2></div></div>
+            <div class="row g-3 mb-3">
+                <div class="col-md-4"><div class="mini-stat"><span>Avg. Expense</span><strong>Rs. {{ analysis_snapshot.average_expense }}</strong></div></div>
+                <div class="col-md-4"><div class="mini-stat"><span>Highest Expense</span><strong>Rs. {{ analysis_snapshot.highest_expense }}</strong></div></div>
+                <div class="col-md-4"><div class="mini-stat"><span>Active Months</span><strong>{{ analysis_snapshot.active_months }}</strong></div></div>
+            </div>
+            <ul class="insight-list">
+                {% for insight in insights %}
+                    <li>{{ insight }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</section>
+
+<section class="row g-4">
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Recent activity</span><h2 class="section-title">Latest transactions</h2></div><a href="{% url 'transaction_list' %}" class="btn btn-sm btn-outline-dark">View all</a></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th>Title</th><th>Category</th><th>Type</th><th>Amount</th></tr></thead>
+                    <tbody>
+                        {% for transaction in recent_transactions %}
+                            <tr>
+                                <td>{{ transaction.title }}<br><small class="text-muted">{{ transaction.date }}</small></td>
+                                <td>{{ transaction.category.name }}</td>
+                                <td><span class="badge text-bg-{% if transaction.transaction_type == 'income' %}success{% else %}danger{% endif %}">{{ transaction.get_transaction_type_display }}</span></td>
+                                <td>Rs. {{ transaction.amount }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted">No transactions added yet.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="content-card h-100">
+            <div class="section-head"><div><span class="eyebrow">Pandas summaries</span><h2 class="section-title">Monthly breakdown</h2></div></div>
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead><tr><th>Month</th><th>Income</th><th>Expense</th><th>Net</th></tr></thead>
+                    <tbody>
+                        {% for summary in monthly_summaries %}
+                            <tr><td>{{ summary.month }}</td><td>Rs. {{ summary.income }}</td><td>Rs. {{ summary.expense }}</td><td>Rs. {{ summary.net }}</td></tr>
+                        {% empty %}
+                            <tr><td colspan="4" class="text-center text-muted">Add transactions to see monthly summaries.</td></tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% if top_categories %}
+                <div class="mt-3">
+                    <h3 class="h6">Top Expense Categories</h3>
+                    <div class="d-flex flex-wrap gap-2">
+                        {% for category in top_categories %}
+                            <span class="chip">{{ category.name }}: Rs. {{ category.amount }}</span>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</section>
+
+{{ monthly_chart|json_script:'monthly-chart-data' }}
+{{ category_chart|json_script:'category-chart-data' }}
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const monthlyChartData = JSON.parse(document.getElementById('monthly-chart-data').textContent);
+const categoryChartData = JSON.parse(document.getElementById('category-chart-data').textContent);
+
+const monthlyChart = document.getElementById('monthlyChart');
+if (monthlyChart) {
+    new Chart(monthlyChart, {
+        type: 'bar',
+        data: {
+            labels: monthlyChartData.labels,
+            datasets: [
+                { label: 'Income', data: monthlyChartData.income, backgroundColor: '#2a9d8f', borderRadius: 8 },
+                { label: 'Expense', data: monthlyChartData.expense, backgroundColor: '#e76f51', borderRadius: 8 }
+            ]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+
+const categoryChart = document.getElementById('categoryChart');
+if (categoryChart) {
+    new Chart(categoryChart, {
+        type: 'doughnut',
+        data: {
+            labels: categoryChartData.labels,
+            datasets: [{
+                data: categoryChartData.values,
+                backgroundColor: ['#264653', '#2a9d8f', '#e9c46a', '#f4a261', '#e76f51', '#8ab17d']
+            }]
+        },
+        options: { responsive: true, maintainAspectRatio: false }
+    });
+}
+</script>
+{% endblock %}

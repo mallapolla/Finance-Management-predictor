@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+
+{% block title %}Login | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-5">
+        <div class="auth-card">
+            <div class="mb-4">
+                <span class="eyebrow">Welcome back</span>
+                <h1 class="page-title mb-2">Log in to your finance dashboard</h1>
+                <p class="text-muted mb-0">Track spending, manage budgets, and review your monthly trends.</p>
+            </div>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        <input
+                            type="{% if field.name == 'password' %}password{% else %}text{% endif %}"
+                            name="{{ field.html_name }}"
+                            id="{{ field.id_for_label }}"
+                            class="form-control"
+                            {% if field.value %}value="{{ field.value }}"{% endif %}
+                            required
+                        >
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-dark w-100" type="submit">Login</button>
+            </form>
+            <p class="small text-muted mt-3 mb-0">Need an account? <a href="{% url 'register' %}">Create one here</a>.</p>
+        </div>
+    </div>
+</div>
+{% endblock %}

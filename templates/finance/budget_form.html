@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Budget Form | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="content-card">
+            <div class="mb-4">
+                <span class="eyebrow">Budget editor</span>
+                <h1 class="page-title mb-1">{% if object %}Update monthly budget{% else %}Set monthly budget{% endif %}</h1>
+                <p class="text-muted mb-0">Budgets are saved month-wise and compared against your expense entries on the dashboard.</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-dark" type="submit">Save Budget</button>
+                    <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

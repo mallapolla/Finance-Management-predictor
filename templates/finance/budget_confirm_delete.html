@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Budget | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="content-card">
+            <h1 class="page-title mb-2">Delete budget</h1>
+            <p class="text-muted">This removes the budget for <strong>{{ object.month|date:'F Y' }}</strong>.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Delete</button>
+                <a href="{% url 'budget_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

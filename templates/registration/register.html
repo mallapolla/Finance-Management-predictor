@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Register | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="auth-card">
+            <div class="mb-4">
+                <span class="eyebrow">New account</span>
+                <h1 class="page-title mb-2">Create your smart finance workspace</h1>
+                <p class="text-muted mb-0">Get default categories, monthly analytics, budget tracking, and expense forecasting from day one.</p>
+            </div>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <div class="form-text">{{ field.help_text|safe }}</div>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <button class="btn btn-dark w-100" type="submit">Create account</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

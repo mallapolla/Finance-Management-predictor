@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+
+{% block title %}Transaction Form | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="content-card">
+            <div class="mb-4">
+                <span class="eyebrow">Transaction editor</span>
+                <h1 class="page-title mb-1">{% if object %}Update transaction{% else %}Add a new transaction{% endif %}</h1>
+                <p class="text-muted mb-0">Capture the date, category, amount, and notes for each money movement.</p>
+            </div>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">{{ form.non_field_errors }}</div>
+                {% endif %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label class="form-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.errors %}<div class="text-danger small mt-1">{{ field.errors|join:', ' }}</div>{% endif %}
+                    </div>
+                {% endfor %}
+                <div class="d-flex gap-2">
+                    <button class="btn btn-dark" type="submit">Save</button>
+                    <a href="{% url 'transaction_list' %}" class="btn btn-outline-secondary">Cancel</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

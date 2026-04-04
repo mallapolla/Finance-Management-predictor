@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category | MoneyMind{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="content-card">
+            <h1 class="page-title mb-2">Delete category</h1>
+            <p class="text-muted">You are removing <strong>{{ object.name }}</strong>. If it is already used by transactions, the app will block deletion to keep your records safe.</p>
+            <form method="post">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit">Delete</button>
+                <a href="{% url 'category_list' %}" class="btn btn-outline-secondary">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
